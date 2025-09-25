@@ -1,0 +1,1507 @@
+{
+  "name": "Agente Personal/Nutri",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Personal-Nutri2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -368,
+        -128
+      ],
+      "id": "b80e4343-ad14-4b24-9a11-5ce64d3d21c4",
+      "name": "Webhook",
+      "webhookId": "496f4570-5177-4e98-95fb-34c156026041"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.MensagemTxT }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    },
+                    "id": "df28b02b-2459-4711-98b1-aef134e49345"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Texto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "12559b5b-9dd9-4477-8e1e-2c9fe4483097",
+                    "leftValue": "={{ $json.MensagemAudio }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "6695f719-3512-4742-8e44-7423e7d9632c",
+                    "leftValue": "={{ $json.MensagemFoto }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Imagens"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        368,
+        -176
+      ],
+      "id": "d2c6a8b1-836f-4ad0-afc2-b863d15db698",
+      "name": "Switch",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "resource": "chat-api",
+        "operation": "get-media-base64",
+        "instanceName": "={{ $json.Instancia }}",
+        "messageId": "={{ $json.ID_MSG }}",
+        "convertToMp4": true
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        736,
+        240
+      ],
+      "id": "7dad0e5f-5fc4-4e8c-90bf-b3a492dccb72",
+      "name": "Obter m dia em base64",
+      "credentials": {
+        "evolutionApi": {
+          "id": "IdFALjfz6Xd5roMe",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8ca4f4fd-8dc0-42bc-ad03-6d1d846369f5",
+              "name": "data.base64",
+              "value": "={{ $json.data.base64 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        928,
+        240
+      ],
+      "id": "2a2b6ffa-ea14-4f91-8ac5-f7026889969e",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data.base64",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1152,
+        240
+      ],
+      "id": "2f812cc5-72c9-4c14-8083-342125bdb5a2",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "text": "Extraia e descreva todos os elementos que aparecem nesta imagem, incluindo objetos, pessoas, cores, textos e contexto e retornar o peso, calorias e medidas.",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1376,
+        240
+      ],
+      "id": "f7248b15-b4f4-4c76-b9f4-45387f5a3998",
+      "name": "Analyze image",
+      "credentials": {
+        "openAiApi": {
+          "id": "LR3lB0qKB2f1urAL",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "chat-api",
+        "operation": "get-media-base64",
+        "instanceName": "={{ $json.Instancia }}",
+        "messageId": "={{ $json.ID_MSG }}",
+        "convertToMp4": true
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        736,
+        16
+      ],
+      "id": "0612e7fc-8a3f-4c82-a427-b876c283a83c",
+      "name": "Obter m dia em base",
+      "credentials": {
+        "evolutionApi": {
+          "id": "IdFALjfz6Xd5roMe",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2e0b96ec-33f6-47c7-a7a2-aeb187b78df9",
+              "name": "data.base64 AUDIO",
+              "value": "={{ $json.data.base64 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        944,
+        16
+      ],
+      "id": "75374886-0653-4820-929e-e7dda6404a54",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data['base64 AUDIO']",
+        "binaryPropertyName": "dataAudio",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1168,
+        16
+      ],
+      "id": "99473850-e09d-4a69-b586-f096086592ff",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "binaryPropertyName": "dataAudio",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1376,
+        16
+      ],
+      "id": "b8d79eb9-f50a-4ef4-884e-c15a276979da",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "LR3lB0qKB2f1urAL",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c2426272-a9c4-4648-a0f3-186a8a31422b",
+              "name": "text.Audio",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "7eef0a7a-3077-4840-adbb-569af32b26d6",
+              "name": "text.text",
+              "value": "={{ $json.Lista_de_Mensagem }}",
+              "type": "string"
+            },
+            {
+              "id": "c8505a48-6635-4d87-9b7c-2cb567659b43",
+              "name": "text.image",
+              "value": "={{ $json.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2368,
+        -48
+      ],
+      "id": "89ee41f3-495e-4096-9993-0b1e7c996837",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('Edit Fields4').item.json.Telefone }} - buffer",
+        "messageData": "={{ $json.MensagemTxT }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        656,
+        -240
+      ],
+      "id": "51065360-4afb-476a-972a-fcd972cd5fbd",
+      "name": "INSERE NA LISTA",
+      "credentials": {
+        "redis": {
+          "id": "bxZgjGuInFpogThN",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "Lista_de_Mensagem",
+        "key": "={{ $('Edit Fields4').item.json.Telefone }} - buffer",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        880,
+        -208
+      ],
+      "id": "431b31f8-bc60-4fd4-bb3c-6bf411972687",
+      "name": "Buscar mensagens",
+      "credentials": {
+        "redis": {
+          "id": "bxZgjGuInFpogThN",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1072,
+        -208
+      ],
+      "id": "29c0e83a-4e0a-4626-a168-f4beb9b65476",
+      "name": "Wait",
+      "webhookId": "2363a1c1-70d9-4972-a221-629dcbe968ba"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "Lista_de_Mensagem",
+        "key": "={{ $('Edit Fields4').item.json.Telefone }} - buffer",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        -208
+      ],
+      "id": "e80abaeb-233a-41ec-a0bb-cf57ca590606",
+      "name": "Buscar mensagens atual",
+      "credentials": {
+        "redis": {
+          "id": "bxZgjGuInFpogThN",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cc9561fa-67a4-4f9d-9a79-a431c14e1735",
+              "leftValue": "={{ $('Buscar mensagens').item.json.Lista_de_Mensagem.length }}",
+              "rightValue": "={{ $json.Lista_de_Mensagem.length }}",
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1472,
+        -224
+      ],
+      "id": "f39a73d2-5507-4ad3-a28c-2e36baf0b371",
+      "name": "If1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        -192
+      ],
+      "id": "27e6e86c-20f6-42c8-8774-4648ddbb88a2",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Edit Fields4').item.json.Telefone }} - buffer"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1728,
+        -352
+      ],
+      "id": "50fe4409-0d17-46e3-ad24-2524bb6b7ccf",
+      "name": "Limpar dados",
+      "credentials": {
+        "redis": {
+          "id": "bxZgjGuInFpogThN",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ddfc8c08-22d7-43e3-abad-b5cd3dfcdf13",
+              "name": "Nome",
+              "value": "={{ $json.body.data.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "da577156-0336-4cb8-98cf-acb620856825",
+              "name": "Telefone",
+              "value": "={{ $json.body.data.key.remoteJid.replaceAll(\"@s.whatsapp.net\",\"\") }}",
+              "type": "string"
+            },
+            {
+              "id": "3ba0eaa2-46cc-41a9-ac24-1f91aba1acca",
+              "name": "tipoMensagem",
+              "value": "={{ $json.body.data.messageType }}",
+              "type": "string"
+            },
+            {
+              "id": "e5af360f-3c55-4a41-bccf-0c764bdf6b4c",
+              "name": "fremMe",
+              "value": "={{ $json.body.data.key.fromMe }}",
+              "type": "string"
+            },
+            {
+              "id": "0fd39744-4570-425b-9898-424733135a4e",
+              "name": "bloquearAgente",
+              "value": "BloquearAgente",
+              "type": "string"
+            },
+            {
+              "id": "7a421dfe-7db5-4ad6-be47-f3e6d7b01bc9",
+              "name": "msgPicotada",
+              "value": "=MensagemPicotada{{ $json.body.data.key.remoteJid }}",
+              "type": "string"
+            },
+            {
+              "id": "09e879f8-6c52-448b-8a9b-5a0a5ca27a6e",
+              "name": "Instancia",
+              "value": "={{ $json.body.instance }}",
+              "type": "string"
+            },
+            {
+              "id": "64bd7c31-7555-4c11-a9dd-85cfb78b19b0",
+              "name": "MensagemTxT",
+              "value": "={{ $json.body.data.message.conversation }}",
+              "type": "string"
+            },
+            {
+              "id": "af9765bc-f02d-4f9d-bb0a-86ba44b73372",
+              "name": "MensagemAudio",
+              "value": "={{ $json.body.data.message.audioMessage }}",
+              "type": "string"
+            },
+            {
+              "id": "ad827962-fbb4-44f0-9e1c-f4bce719d25a",
+              "name": "MensagemFoto",
+              "value": "={{ $json.body.data.message.imageMessage.url }}",
+              "type": "string"
+            },
+            {
+              "id": "08622c0c-4efc-4ee2-aea6-d5977e48cde7",
+              "name": "ID_MSG",
+              "value": "={{ $json.body.data.key.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        48,
+        -160
+      ],
+      "id": "e419018a-5ec3-47f1-aed9-ed7352c34f25",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text.image }}{{ $json.text.text }}{{ $json.text.Audio }}",
+        "options": {
+          "systemMessage": "=1. Persona e Tom de Voz\n\nSeu Nome: NutriFit AI\n\nSeu Papel: Você é um consultor especialista em nutrição e atividade física.\n\nSeu Tom: Sua comunicação deve ser sempre profissional, empática, motivadora e baseada em dados. Use uma linguagem clara e acessível, evitando jargões técnicos excessivos.\n\n2. Objetivo Principal\n\nSeu objetivo é coletar dados de novos usuários para construir um perfil detalhado e, para usuários já cadastrados, atuar como um assistente pessoal para ajudá-los a atingir suas metas de saúde e bem-estar.\n\n3. Lógica e Fluxo de Conversa\n\nEste é o processo que você deve seguir rigorosamente em todas as interações.\n\nPasso 1: Verificação Inicial na \"Super Memória\"\n\nAção: Antes de enviar qualquer mensagem, verifique na \"Super Memória\" (sua base de dados) se já existe um perfil para o ID do usuário atual.\n\nPasso 2A: Fluxo para Novo Usuário (Se a \"Super Memória\" estiver vazia)\n\nAção: Inicie o processo de onboarding. Faça as seguintes perguntas, uma de cada vez, e aguarde a resposta antes de prosseguir para a próxima.\n\n\"Olá! Sou o NutriFit AI, seu assistente pessoal de nutrição e bem-estar. Para começarmos, qual é o seu nome?\"\n\n\"Prazer em conhecê-lo(a), [Nome do Usuário]! Qual é o seu melhor e-mail para contato?\"\n\n\"Para que eu possa criar recomendações perfeitas para você, me diga: há algum alimento que você realmente não gosta ou tem alguma restrição?\"\n\n\"Ótimo. Agora, por favor, me informe sua altura (em cm) e seu peso (em kg).\"\n\n\"E quais são os alimentos que você mais gosta? Saber disso me ajuda a montar um plano que você vai adorar seguir.\"\n\n\"Para finalizar, como você descreveria seu nível de atividade física? (Ex: Sedentário, Levemente Ativo, Moderadamente Ativo, Muito Ativo).\"\n\nObrigação: A cada resposta, salve a informação imediatamente na \"Super Memória\" associada ao ID do usuário.\n\nConclusão do Onboarding: Após a última pergunta, diga: \"Perfeito, [Nome do Usuário]! Seu perfil está completo. Agora estou pronto para te ajudar a alcançar seus objetivos. Como posso te auxiliar hoje?\"\n\nPasso 2B: Fluxo para Usuário Existente (Se a \"Super Memória\" retornar dados)\n\nAção: Inicie a conversa de forma personalizada e proativa.\n\nExemplo de Saudação: \"Olá, [Nome do Usuário]! Que bom te ver por aqui. Como posso te ajudar hoje com sua rotina de alimentação ou exercícios?\"\n\nModo de Atuação: Aja diretamente como um especialista. Responda a perguntas, analise informações e forneça conselhos com base nos dados já armazenados.\n\n4. Análise de Entradas do Usuário (Para Usuários Existentes)\n\nTexto: Responda a perguntas sobre contagem de calorias, sugestões de receitas, planos de treino, dicas de motivação, etc., sempre personalizando com base nos dados do perfil (gostos, aversões, objetivos).\n\nFotos (Imagens): Ao receber uma foto, sua tarefa é analisá-la.\n\nSe for uma refeição: Identifique os alimentos, estime o tamanho das porções e forneça um feedback nutricional construtivo. Ex: \"Vejo que seu prato tem [alimento A], [alimento B] e [alimento C]. Parece uma boa fonte de proteínas e fibras. Para a próxima, que tal adicionar um pouco mais de vegetais verdes para aumentar a ingestão de vitaminas?\"\n\nSe for um exercício: Se possível, identifique o exercício e ofereça dicas de postura ou variações.\n\nÁudio: Transcreva a mensagem de áudio para texto e processe a solicitação como se tivesse sido digitada.\n\n5. Regras Essenciais e Invioláveis\n\nNUNCA peça uma informação que já consta na \"Super Memória\".\n\nSEMPRE pergunte apenas uma coisa de cada vez durante o onboarding.\n\nSEMPRE verifique a \"Super Memória\" antes de formular qualquer resposta.\n\nSEMPRE mantenha a persona de especialista empático e motivador.\n\nAVISO LEGAL: Se o usuário perguntar sobre condições médicas, suplementos específicos para doenças ou lesões, inclua um aviso: \"Lembre-se que sou uma IA de bem-estar e não substituo o conselho de um médico ou nutricionista profissional. Para questões de saúde, consulte um especialista.\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2576,
+        -48
+      ],
+      "id": "f1697f45-7392-41da-a506-8b395f4d11d0",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Edit Fields4').item.json.Telefone }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        2624,
+        208
+      ],
+      "id": "7c9c47e2-53f5-4fbe-847b-9dc25b846edf",
+      "name": "Redis Chat Memory",
+      "credentials": {
+        "redis": {
+          "id": "bxZgjGuInFpogThN",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "chat-api",
+        "operation": "send-presence",
+        "instanceName": "={{ $('Edit Fields4').item.json.Instancia }}",
+        "remoteJid": "={{ $('Edit Fields4').item.json.Telefone }}"
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        3024,
+        -48
+      ],
+      "id": "23b5a5b3-4a52-493b-a48c-7d8a6a2998e1",
+      "name": "Enviar presen a",
+      "credentials": {
+        "evolutionApi": {
+          "id": "IdFALjfz6Xd5roMe",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Edit Fields4').item.json.Instancia }}",
+        "remoteJid": "={{ $('Edit Fields4').item.json.Telefone }}",
+        "messageText": "={{ $('AI Agent').item.json.output }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        3296,
+        -48
+      ],
+      "id": "15e5e950-96e5-4db0-aa43-3ce75957f8e1",
+      "name": "Enviar texto",
+      "credentials": {
+        "evolutionApi": {
+          "id": "IdFALjfz6Xd5roMe",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Chame essa ferramenta quando quiser lembrar mais informações sobre o usuário. também é interessante utilizá-la para armazenar dados",
+        "workflowId": {
+          "__rl": true,
+          "value": "BjCdlfRfHJnLnbFv",
+          "mode": "list",
+          "cachedResultName": "Agente Personal/Nutri"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Número": "={{ $('Edit Fields4').item.json.Telefone }}",
+            "Email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Email', ``, 'string') }}",
+            "Alimentos do seu agrado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Alimentos_do_seu_agrado', ``, 'string') }}",
+            "Alimentos que não são do seu agrado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Alimentos_que_n_o_s_o_do_seu_agrado', ``, 'string') }}",
+            "Peso": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Peso', ``, 'string') }}",
+            "Altura": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Altura', ``, 'string') }}",
+            "Nome": "={{ $('Edit Fields4').item.json.Nome }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Alimentos do seu agrado",
+              "displayName": "Alimentos do seu agrado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Número",
+              "displayName": "Número",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Alimentos que não são do seu agrado",
+              "displayName": "Alimentos que não são do seu agrado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Peso",
+              "displayName": "Peso",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Altura",
+              "displayName": "Altura",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nome",
+              "displayName": "Nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        2832,
+        208
+      ],
+      "id": "9a0ce2b9-3dd0-489d-b0f3-d60d5dcf538b",
+      "name": "Super memoria"
+    },
+    {
+      "parameters": {
+        "content": "Buffer de menssagem \n",
+        "height": 368,
+        "width": 1440
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        624,
+        -384
+      ],
+      "typeVersion": 1,
+      "id": "2b8ff49a-ec39-4236-9344-c2cca79eecec",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "AUDIO\n",
+        "height": 176,
+        "width": 928,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "831a57dc-d548-4527-825a-c5f1aaa08d68",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "height": 432,
+        "width": 1344,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2224,
+        -144
+      ],
+      "typeVersion": 1,
+      "id": "82844919-6381-43f5-8557-832ec4bc1799",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "Imagem",
+        "height": 192,
+        "width": 912,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "f8d5dfa0-2f5f-4c8c-bf1f-8c913a426b43",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "height": 560,
+        "width": 1504,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        960,
+        1056
+      ],
+      "typeVersion": 1,
+      "id": "4d3187f1-602a-4322-8818-9154838e47e3",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        608
+      ],
+      "id": "32cb8dc4-ab96-4325-9e46-7daaa421031b",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1744,
+        816
+      ],
+      "id": "ad518dd4-019e-41a2-8ccf-41c2a2585768",
+      "name": "Wait1",
+      "webhookId": "22580a71-d996-4171-a698-b1e4948f160e"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1oNo8gfEPWja2avzEHb2XNVY5CK7FFgOkZLtDZrN2VYo",
+          "mode": "list",
+          "cachedResultName": "Nutri",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNo8gfEPWja2avzEHb2XNVY5CK7FFgOkZLtDZrN2VYo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNo8gfEPWja2avzEHb2XNVY5CK7FFgOkZLtDZrN2VYo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Número": "={{ $('Vem da IA principal').item.json['Número'] }}",
+            "Email": "={{ $('Vem da IA principal').item.json.Email }}",
+            "Alimentos do seu agrado": "={{ $('Vem da IA principal').item.json['Alimentos do seu agrado'] }}",
+            "Peso": "={{ $('Vem da IA principal').item.json.Peso }}",
+            "Altura": "={{ $('Vem da IA principal').item.json.Altura }}",
+            "Nome": "={{ $('Vem da IA principal').item.json.Nome }}",
+            "Alimentos que não são do seu agrado": "={{ $('Vem da IA principal').item.json['Alimentos que não são do seu agrado'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Alimentos do seu agrado",
+              "displayName": "Alimentos do seu agrado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Número",
+              "displayName": "Número",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Alimentos que não são do seu agrado",
+              "displayName": "Alimentos que não são do seu agrado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Peso",
+              "displayName": "Peso",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Altura",
+              "displayName": "Altura",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nome",
+              "displayName": "Nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Resumo Cliente",
+              "displayName": "Resumo Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1536,
+        816
+      ],
+      "id": "733d5135-bf7e-45cb-9bdf-3655f8642765",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "iFz7qTgm6B8zyhun",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a2d16db2-9b18-4617-ac9d-897ad5964e9f",
+              "leftValue": "={{ $json['Número'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1312,
+        672
+      ],
+      "id": "5b889b9e-c872-47b8-9dd5-446dbcfd26ac",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1oNo8gfEPWja2avzEHb2XNVY5CK7FFgOkZLtDZrN2VYo",
+          "mode": "list",
+          "cachedResultName": "Nutri",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNo8gfEPWja2avzEHb2XNVY5CK7FFgOkZLtDZrN2VYo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1oNo8gfEPWja2avzEHb2XNVY5CK7FFgOkZLtDZrN2VYo/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1104,
+        672
+      ],
+      "id": "62f90222-5d5a-4509-b552-55c3c716a95b",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "iFz7qTgm6B8zyhun",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "Alimentos do seu agrado",
+              "type": "any"
+            },
+            {
+              "name": "Número",
+              "type": "any"
+            },
+            {
+              "name": "Email",
+              "type": "any"
+            },
+            {
+              "name": "Alimentos que não são do seu agrado",
+              "type": "any"
+            },
+            {
+              "name": "Peso",
+              "type": "any"
+            },
+            {
+              "name": "Altura",
+              "type": "any"
+            },
+            {
+              "name": "Nome",
+              "type": "any"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        672
+      ],
+      "id": "ed5ecc41-e796-4463-8a78-0bee0cc2ced3",
+      "name": "Vem da IA principal",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2448,
+        160
+      ],
+      "id": "e4c07b25-5061-4885-a6eb-22d0deb22c2e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "0rcLObwNY56UCbg6",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "webhook.neurogrid.com.br",
+            "user-agent": "axios/1.10.0",
+            "content-length": "1105",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, compress, deflate, br",
+            "content-type": "application/json",
+            "x-forwarded-for": "172.18.0.1",
+            "x-forwarded-host": "webhook.neurogrid.com.br",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "a72dd06a66ed",
+            "x-real-ip": "172.18.0.1"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "event": "messages.upsert",
+            "instance": "Testes",
+            "data": {
+              "key": {
+                "remoteJid": "556185495829@s.whatsapp.net",
+                "fromMe": false,
+                "id": "3EB0289C1FBF202129E671",
+                "senderLid": "219163809325243@lid"
+              },
+              "pushName": "Guilherme Torres",
+              "status": "DELIVERY_ACK",
+              "message": {
+                "conversation": "Guilherme Torres",
+                "messageContextInfo": {
+                  "deviceListMetadata": {
+                    "senderKeyHash": "0JnTQ6QawOnDPg==",
+                    "senderTimestamp": "1757443326",
+                    "senderAccountType": "E2EE",
+                    "receiverAccountType": "E2EE",
+                    "recipientKeyHash": "wRWnV+adUwcl1g==",
+                    "recipientTimestamp": "1757351311"
+                  },
+                  "deviceListMetadataVersion": 2,
+                  "messageSecret": "4OR6at8DlDXavScciJ4sIp3Ps+EuujhLdthFgtC1SEo=",
+                  "limitSharingV2": {
+                    "sharingLimited": false,
+                    "trigger": "UNKNOWN",
+                    "limitSharingSettingTimestamp": "0",
+                    "initiatedByMe": false
+                  }
+                }
+              },
+              "messageType": "conversation",
+              "messageTimestamp": 1757531907,
+              "instanceId": "5eed14d1-1cae-400c-b04e-54e5d755c9d8",
+              "source": "web"
+            },
+            "destination": "https://webhook.neurogrid.com.br/webhook/Personal-Nutri2",
+            "date_time": "2025-09-10T16:18:27.295Z",
+            "sender": "556191870277@s.whatsapp.net",
+            "server_url": "https://api.neurogrid.com.br",
+            "apikey": "0E59D6E23B4F-45C9-B565-AAD61FB15E92"
+          },
+          "webhookUrl": "https://webhook.neurogrid.com.br/webhook/Personal-Nutri2",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "INSERE NA LISTA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Obter m dia em base",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Obter m dia em base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obter m dia em base64": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obter m dia em base": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "INSERE NA LISTA": {
+      "main": [
+        [
+          {
+            "node": "Buscar mensagens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar mensagens": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Buscar mensagens atual",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar mensagens atual": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Limpar dados",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpar dados": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Enviar presen a",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar presen a": {
+      "main": [
+        [
+          {
+            "node": "Enviar texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Super memoria": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vem da IA principal": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5a8d9cf9-6737-4e78-bca1-6147b608bcc7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bee7877d59471bef06ae66bc161cd22b2af901127665b1c022db8c83f56b09f3"
+  },
+  "id": "BjCdlfRfHJnLnbFv",
+  "tags": []
+}
